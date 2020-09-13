@@ -50,7 +50,28 @@ namespace Watertight.FlowUI
             get;
         } = new DrawListSharedData();
 
+        internal Stack<Style> StyleStack
+        {
+            get;
+        } = new Stack<Style>();
 
+        public Style DefaultStyle
+        {
+            get;
+            internal set;
+        } = Style.Default;
+
+        public Style CurrentStyle
+        {
+            get
+            {
+                if(StyleStack.Count > 0)
+                {
+                    return StyleStack.Peek();
+                }
+                return DefaultStyle;
+            }
+        }
 
         internal void Initialize()
         {
@@ -66,6 +87,6 @@ namespace Watertight.FlowUI
         {
 
         }
-
+          
     }
 }

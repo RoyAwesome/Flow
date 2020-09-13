@@ -54,7 +54,7 @@ namespace Watertight.FlowUI
 
         private static void DrawWindowBackground(Window window)
         {
-            window.DrawList.AddRectFilled(new System.Numerics.Vector2(50, 50), new System.Numerics.Vector2(100, 100), System.Drawing.Color.Black, 0);
+            window.DrawList.AddRectFilled(new System.Numerics.Vector2(50, 50), new System.Numerics.Vector2(100, 100), GlobalContext.CurrentStyle.WindowBackground, 0);
         }
 
         public static void End()

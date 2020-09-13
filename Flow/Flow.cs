@@ -2,7 +2,6 @@
 using System.ComponentModel.Design;
 using System.Runtime.Serialization;
 using Watertight.FlowUI.Draw;
-using Watertight.FlowUI.Draw;
 
 namespace Watertight.FlowUI
 {
@@ -78,6 +77,21 @@ namespace Watertight.FlowUI
             //TODO: Add all windows to the draw data
 
             AddWindowToDrawData(GlobalContext.FallbackWindow, DrawData);
+        }
+
+        public static void BeginStyle(Style style)
+        {
+            GlobalContext.StyleStack.Push(style);
+        }
+
+        public static void EndStyle()
+        {
+            if(GlobalContext.StyleStack.Count == 0)
+            {
+                throw new FlowException("Cannot end a style when there is no style to end!  (Probably mismatched BeginStyle/EndStyle calls)");
+            }
+
+            GlobalContext.StyleStack.Pop();
         }
              
     }
