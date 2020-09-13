@@ -16,5 +16,20 @@ namespace Watertight.FlowUI
         {
             return FromFloats(r, g, b, 1.0f);
         }
+
+        public static int Lerp(int a, int b, float alpha)
+        {
+            //return (1 - t) * v0 + t * v1;
+            return (int)((1 - alpha) * a + alpha * b);
+        }
+
+        public static Color Lerp(Color A, Color B, float alpha)
+        {
+            return Color.FromArgb(
+                Lerp(A.A, B.A, alpha),
+                Lerp(A.R, B.R, alpha),
+                Lerp(A.G, B.G, alpha),
+                Lerp(A.B, B.B, alpha));
+        }
     }
 }
