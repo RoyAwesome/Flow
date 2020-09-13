@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Watertight.Flow.Draw
+namespace Watertight.FlowUI.Draw
 {
     public class DrawData
     {
@@ -13,15 +13,23 @@ namespace Watertight.Flow.Draw
             internal set;
         }
 
+        public List<DrawList> DrawLists
+        {
+            get;
+        } = new List<DrawList>();
+                
         internal void Invalidate()
         {
             Valid = false;
+            DrawLists.Clear();
         }
 
-        internal void Reset()
+        internal void ResetForRenderFrame()
         {
             Valid = true;
 
         }
+
+        
     }
 }

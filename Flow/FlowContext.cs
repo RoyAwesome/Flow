@@ -1,11 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using Watertight.FlowUI.Draw;
 
-namespace Watertight.Flow
+namespace Watertight.FlowUI
 {
-    public class FlowContext
+    public partial class FlowContext
     {
+
+
         internal FlowContext()
         {
 
@@ -41,6 +45,11 @@ namespace Watertight.Flow
             set;
         }
 
+        DrawListSharedData SharedData
+        {
+            get;
+        } = new DrawListSharedData();
+
 
 
         internal void Initialize()
@@ -49,11 +58,14 @@ namespace Watertight.Flow
             FrameCount = 0;
             LastEndFrameCount = 0;
             IsInFrame = false;
+
+            FallbackWindow = GetOrCreateWindow(DefaultWindowName);
         }
 
         internal void ResetForNewFrame()
         {
 
         }
+
     }
 }

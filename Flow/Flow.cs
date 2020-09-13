@@ -1,12 +1,13 @@
 ﻿using System;
 using System.ComponentModel.Design;
 using System.Runtime.Serialization;
-using Watertight.Flow.Draw;
+using Watertight.FlowUI.Draw;
+using Watertight.FlowUI.Draw;
 
-namespace Watertight.Flow
+namespace Watertight.FlowUI
 {
     public static partial class Flow
-    {
+    {        
         private static FlowContext GlobalContext
         {
             get;
@@ -17,6 +18,14 @@ namespace Watertight.Flow
         {
             get;
             set;
+        }
+
+        public static DrawData DrawData
+        {
+            get
+            {
+                return DrawLists[GlobalContext.LastRenderFrame % DrawLists.Length];
+            }
         }
 
 
@@ -53,7 +62,7 @@ namespace Watertight.Flow
             GlobalContext.ResetForNewFrame();
 
             //Invalidate the current frame, as we are building a new one
-            GetDrawData().Invalidate();
+            DrawData.Invalidate();
 
         }      
 
@@ -64,15 +73,13 @@ namespace Watertight.Flow
             
             
             GlobalContext.LastRenderFrame = GlobalContext.FrameCount;
-            DrawData DL = GetDrawData();
-            DL.Reset();
-            
-        }
+            DrawData.ResetForRenderFrame();
 
-        public static DrawData GetDrawData()
-        {
-            return DrawLists[GlobalContext.LastRenderFrame % DrawLists.Length];
+            //TODO: Add all windows to the draw data
+
+            AddWindowToDrawData(GlobalContext.FallbackWindow, DrawData);
         }
+             
     }
 
     public class FlowException : Exception

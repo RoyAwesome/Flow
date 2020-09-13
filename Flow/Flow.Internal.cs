@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Watertight.FlowUI.Draw;
 
-namespace Watertight.Flow
+namespace Watertight.FlowUI
 {
     public static partial class Flow
     {
@@ -46,6 +47,19 @@ namespace Watertight.Flow
         {
             GlobalContext.LastEndFrameCount = GlobalContext.FrameCount;
             GlobalContext.IsInFrame = false;
+        }
+
+        private static void AddDrawListToDrawData(DrawList List, DrawData Data)
+        {
+            //TODO: Sanity Checks
+            Data.DrawLists.Add(List);
+        }
+
+        private static void AddWindowToDrawData(FlowContext.Window Window, DrawData Data)
+        {
+            //TODO: Metrics
+
+            AddDrawListToDrawData(Window.DrawList, Data);
         }
 
     }
