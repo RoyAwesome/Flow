@@ -1,14 +1,244 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Drawing;
-using System.Text;
+using System.Numerics;
 
 namespace Watertight.FlowUI
 {
+    public enum EGUIDirection
+    {
+        None,
+        Left,
+        Right,
+    }
+
     public class Style
     {
 
         #region Styles Control
+        public float Alpha
+        {
+            get;
+            set;
+        } = 1.0f;
+
+        public Vector2 WindowPadding
+        {
+            get;
+            set;
+        } = new Vector2(8, 8);
+
+        public float WindowRounding
+        {
+            get;
+            set;
+        } = 7.0f;
+
+        public float WindowBorderSize
+        {
+            get;
+            set;
+        } = 1.0f;
+
+        public Vector2 WindowMinSize
+        {
+            get;
+            set;
+        } = new Vector2(32, 32);
+
+        public Vector2 WindowTitleAlign
+        {
+            get;
+            set;
+        } = new Vector2(0, 0.5f);
+
+
+
+        public EGUIDirection WindowMenuButtonPosition
+        {
+            get;
+            set;
+        } = EGUIDirection.Left;
+
+        public float ChildRounding
+        {
+            get;
+            set;
+        } = 0.0f;
+
+        public float ChildBorderSize
+        {
+            get;
+            set;
+        } = 1.0f;
+
+        public float PopupRounding
+        {
+            get;
+            set;
+        } = 0.0f;
+
+        public float PopupBorderSize
+        {
+            get;
+            set;
+        } = 1.0f;
+
+        public Vector2 FramePadding
+        {
+            get;
+            set;
+        } = new Vector2(4, 3);
+
+        public float FrameRounding
+        {
+            get;
+            set;
+        } = 0.0f;
+
+        public float FrameBorderSize
+        {
+            get;
+            set;
+        } = 0.0f;
+
+        public Vector2 ItemSpacing
+        {
+            get;
+            set;
+        } = new Vector2(8, 4);
+
+        public Vector2 ItemInnerSpacing
+        {
+            get;
+            set;
+        } = new Vector2(4, 4);
+
+        public Vector2 TouchExtraPadding
+        {
+            get;
+            set;
+        } = new Vector2(0, 0);
+
+        public float IndentSpacing
+        {
+            get;
+            set;
+        } = 21.0f;
+
+        public float ColumnsMinSpacing
+        {
+            get;
+            set;
+        } = 6.0f;
+
+        public float ScrollbarSize
+        {
+            get;
+            set;
+        } = 14.0f;
+
+        public float ScrollbarRounding
+        {
+            get;
+            set;
+        } = 9.0f;
+
+        public float GrabMinSize
+        {
+            get;
+            set;
+        } = 10.0f;
+
+        public float GrabRounding
+        {
+            get;
+            set;
+        } = 0.0f;
+
+        public float TabRounding
+        {
+            get;
+            set;
+        } = 4.0f;
+
+        public float TabBorderSize
+        {
+            get;
+            set;
+        } = 0.0f;
+
+        public float TabMinWidthForUnselectedCloseButton
+        {
+            get;
+            set;
+        } = 0.0f;
+
+        public EGUIDirection ColorButtonPosition
+        {
+            get;
+            set;
+        } = EGUIDirection.Right;
+
+        public Vector2 ButtonTextAlign
+        {
+            get;
+            set;
+        } = new Vector2(.5f, .5f);
+
+        public Vector2 SelectableTextAlign
+        {
+            get;
+            set;
+        } = new Vector2(0.0f, 0.0f);
+
+        public Vector2 DisplayWindowPadding
+        {
+            get;
+            set;
+        } = new Vector2(19, 19);
+
+        public Vector2 DisplaySafeAreaPadding
+        {
+            get;
+            set;
+        } = new Vector2(3, 3);
+
+        public float MouseCursorScale
+        {
+            get;
+            set;
+        } = 1.0f;
+
+        public bool AntiAliasedLines
+        {
+            get;
+            set;
+        } = true;
+
+        public bool AntiAliasedLinesUseTexture
+        {
+            get;
+            set;
+        } = true;
+
+        public bool AntiAliasedFill
+        {
+            get;
+            set;
+        } = true;
+
+        public float CurveTesselationTolerance
+        {
+            get;
+            set;
+        } = 1.25f;
+
+        public float CircleSegmentMaxError
+        {
+            get;
+            set;
+        } = 1.60f;      
+
 
         #endregion
 

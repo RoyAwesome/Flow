@@ -7,7 +7,7 @@ namespace Watertight.FlowUI
 {
     public static partial class Flow
     {        
-        private static FlowContext GlobalContext
+        internal static FlowContext GlobalContext
         {
             get;
             set;
@@ -24,6 +24,14 @@ namespace Watertight.FlowUI
             get
             {
                 return DrawLists[GlobalContext.LastRenderFrame % DrawLists.Length];
+            }
+        }
+
+        public static Style CurrentStyle
+        {
+            get
+            {
+                return GlobalContext.CurrentStyle;
             }
         }
 

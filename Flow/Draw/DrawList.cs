@@ -9,6 +9,20 @@ using System.Linq;
 
 namespace Watertight.FlowUI.Draw
 {
+    public enum EDrawCornerFlags : byte
+    {
+        None = 0,
+        TopLeft = 1 << 0, // 0x1
+        TopRight = 1 << 1, // 0x2
+        BotLeft = 1 << 2, // 0x4
+        BotRight = 1 << 3, // 0x8
+        Top = TopLeft | TopRight,   // 0x3
+        Bot = BotLeft | BotRight,   // 0xC
+        Left = TopLeft | BotLeft,    // 0x5
+        Right = TopRight | BotRight,  // 0xA
+        All = 0xF     
+    }
+
     [StructLayout(LayoutKind.Sequential)]
     public struct Vertex
     {
@@ -19,6 +33,8 @@ namespace Watertight.FlowUI.Draw
 
     internal class DrawListSharedData
     {
+        internal const int ArcFast_TessalationMultiplier = 1;
+
         public Vector2 OpaquePixel
         {
             get;
@@ -30,6 +46,62 @@ namespace Watertight.FlowUI.Draw
             get;
             set;
         } = Vector2.Zero;
+
+        public Vector2[] ArcFastVertexLookupTable
+        {
+            get;
+        }
+
+        public byte[] CircleSegmentCounts
+        {
+            get;
+        } = new byte[64];
+
+        public float CurveTesselationTolerance
+        {
+            get;
+            set;
+        }
+        public float CircleSegmentMaxError
+        {
+            get;
+            set;
+        }
+
+        public DrawListSharedData()
+        {
+            ArcFastVertexLookupTable = new Vector2[12 * ArcFast_TessalationMultiplier];
+
+            for(int i = 0; i < ArcFastVertexLookupTable.Length; i++)
+            {
+                float a = ((float)i * 2 * MathF.PI) / (float)ArcFastVertexLookupTable.Length;
+                ArcFastVertexLookupTable[i] = new Vector2(MathF.Cos(a), MathF.Sin(a));
+            }
+
+        }
+
+        public void SetCircleSegmentMaxError(float max_error)
+        {
+            if (CircleSegmentMaxError == max_error)
+            {
+                return;
+            }
+
+            CircleSegmentMaxError = max_error;
+            for(int i = 0; i < CircleSegmentCounts.Length; i++)
+            {
+                float radius = i + 1.0f;
+                int segment_count = AutoSegmentCalc(radius, max_error);
+                CircleSegmentCounts[i] = (byte)Math.Min(segment_count, 255);
+            }
+        }
+        const int AutoSegmentMin = 12;
+        const int AutoSegmentMax = 512;
+
+        private static int AutoSegmentCalc(float Rad, float max_error)
+        {
+            return Math.Clamp((int)((MathF.PI * 2) / MathF.Acos((Rad - max_error) / Rad)), AutoSegmentMin, AutoSegmentMax);
+        }
     }
 
     public class DrawList
@@ -290,9 +362,13 @@ namespace Watertight.FlowUI.Draw
             PathClear();
         }
 
-        public void PathRect(Vector2 Min, Vector2 Max, float Rounding /*, CornerFlags */)
+        public void PathRect(Vector2 Min, Vector2 Max, float Rounding, EDrawCornerFlags RoundingFlags = EDrawCornerFlags.All)
         {
-            if(Rounding <= 0.0f)
+            Rounding = Math.Min(Rounding, Math.Abs(Max.X - Min.X) * (RoundingFlags.HasFlag(EDrawCornerFlags.Top) || RoundingFlags.HasFlag(EDrawCornerFlags.Bot) ? 0.5f : 1.0f) - 1.0f);
+            Rounding = Math.Min(Rounding, Math.Abs(Max.Y - Min.Y) * (RoundingFlags.HasFlag(EDrawCornerFlags.Left) || RoundingFlags.HasFlag(EDrawCornerFlags.Right) ? 0.5f : 1.0f) - 1.0f);
+
+
+            if (Rounding <= 0.0f)
             {
                 PathLineTo(Min);
                 PathLineTo(new Vector2(Max.X, Min.Y));
@@ -302,39 +378,64 @@ namespace Watertight.FlowUI.Draw
             else
             {
                 //Rounded Corners
+
+                float RoundingTL = RoundingFlags.HasFlag(EDrawCornerFlags.TopLeft) ? Rounding : 0.0f;
+                float RoundingBL = RoundingFlags.HasFlag(EDrawCornerFlags.BotLeft) ? Rounding : 0.0f;
+                float RoundingTR = RoundingFlags.HasFlag(EDrawCornerFlags.TopRight) ? Rounding : 0.0f;
+                float RoundingBR = RoundingFlags.HasFlag(EDrawCornerFlags.BotRight) ? Rounding : 0.0f;
+
+                PathArcToFast(new Vector2(Min.X + RoundingTL, Min.Y + RoundingTL), RoundingTL, 6, 9);
+                PathArcToFast(new Vector2(Max.X - RoundingTR, Min.Y + RoundingTR), RoundingTR, 9, 12);
+                PathArcToFast(new Vector2(Max.X - RoundingBR, Max.Y - RoundingBR), RoundingBR, 0, 3);
+                PathArcToFast(new Vector2(Min.X + RoundingBL, Max.Y - RoundingBL), RoundingBL, 3, 6);
             }
-        }        
+        }       
+        
+        void PathArcToFast(Vector2 Center, float Radius, int a_min_of_12, int a_max_of_12)
+        {
+            if(Radius == 0.0f || a_min_of_12 > a_max_of_12)
+            {
+                _PathBuilder.Add(Center);
+                return;
+            }
+
+            if(DrawListSharedData.ArcFast_TessalationMultiplier != 1)
+            {
+                a_min_of_12 *= DrawListSharedData.ArcFast_TessalationMultiplier;
+                a_max_of_12 *= DrawListSharedData.ArcFast_TessalationMultiplier;
+            }
+
+            for(int a = a_min_of_12; a <= a_max_of_12; a++)
+            {
+                Vector2 c = SharedData.ArcFastVertexLookupTable[a % SharedData.ArcFastVertexLookupTable.Length];
+                _PathBuilder.Add(new Vector2(Center.X + c.X * Radius, Center.Y + c.Y * Radius));
+            }
+        }
         #endregion
 
         #region Shapes
-        public void AddRect(Vector2 Min, Vector2 Max, Color Color, float Rounding, float Thickness = 1.0f)
+        public void AddRect(Vector2 Min, Vector2 Max, Color Color, float Rounding, float Thickness = 1.0f, EDrawCornerFlags RoundingFlags = EDrawCornerFlags.All)
         {
             if(Color.A == 0)
             {
                 return;
             }
 
-            PathRect(Min + new Vector2(.5f, .5f), Max - new Vector2(.5f, .5f), Rounding);
+            PathRect(Min + new Vector2(.5f, .5f), Max - new Vector2(.5f, .5f), Rounding, RoundingFlags);
             PathStroke(Color, true, Thickness);
+
         }
 
-        public void AddRectFilled(Vector2 Min, Vector2 Max, Color color, float Rounding)
+        public void AddRectFilled(Vector2 Min, Vector2 Max, Color color, float Rounding, EDrawCornerFlags RoundingFlags = EDrawCornerFlags.All)
         {
             if(color.A == 0)
             {
                 return;
             }
+       
+            PathRect(Min, Max, Rounding, RoundingFlags);
+            PathFilled(color);
 
-            //TODO: Rounding
-            if(Rounding > 0.0f)
-            {
-
-            }
-            else
-            {
-                PathRect(Min, Max, Rounding);
-                PathFilled(color);
-            }
         }
         #endregion
     }
