@@ -5,4 +5,8 @@
     <RootNamespace>Watertight.FlowUI</RootNamespace>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="StbTrueTypeSharp" Version="1.24.6" />
+  </ItemGroup>
+
 </Project>
